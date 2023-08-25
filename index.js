@@ -13,13 +13,12 @@ const replaceTemplate = (temp, product) =>  {
   output = output.replace(/{%DESCRIPTION%}/g, product.description)
   output = output.replace(/{%ID%}/g, product.id)
 
-  if(!product.organic) {
-    output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic')
-    return output
-  }
-
-  // output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic')
-  // return output
+  // if(!product.organic) {
+  //   output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic')
+  //   return output
+  // }
+  output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic')
+  return output
 }
 
 const tempOverview = fs.readFileSync(
@@ -38,7 +37,7 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8')
 const dataObj = JSON.parse(data)
 
 const server = http.createServer((req, res) => {
-  const pathname = req.url
+  const {query, pathname} = url.parse(req.url, true);
 
 // Overview Page
 if (pathname === '/' || pathname === '/overview') {
@@ -52,7 +51,12 @@ if (pathname === '/' || pathname === '/overview') {
 
 // Product Page    
   } else if(pathname === '/product') {
-    res.end("This is the product");
+    res.writeHead(200, {
+      'Content-type': 'text/html'
+    });
+    const product = dataObj[query.id]
+    const output = replaceTemplate(tempProduct, product)
+    res.end(output);
 
 // API
   } else if(pathname === '/api') {
